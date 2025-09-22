@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Details - Schoova</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .streak-fire {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .accomplishment-card {
+            border-left: 4px solid #10b981;
+        }
+        .accomplishment-card.coding { border-left-color: #3b82f6; }
+        .accomplishment-card.study { border-left-color: #8b5cf6; }
+        .accomplishment-card.project { border-left-color: #f59e0b; }
+        .accomplishment-card.other { border-left-color: #6b7280; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <a href="/dashboard" class="text-white text-2xl font-bold">
+                            <i class="fas fa-graduation-cap mr-2"></i>Schoova
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="welcomeUser" class="text-white">Welcome!</span>
+                    <button id="logoutBtn" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Group Header -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 id="groupName" class="text-3xl font-bold text-gray-900">Group Name</h1>
+                    <p id="groupDescription" class="text-gray-600 mt-2">Group description</p>
+                    <p id="memberCount" class="text-sm text-gray-500 mt-1">0 members</p>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="postAccomplishmentBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        <i class="fas fa-plus mr-2"></i>Post Achievement
+                    </button>
+                    <button id="viewStreaksBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                        <i class="fas fa-fire mr-2"></i>View Streaks
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Accomplishments Feed -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-trophy text-yellow-500 mr-3"></i>
+                        Group Accomplishments
+                    </h2>
+                    <div id="accomplishmentsFeed" class="space-y-4">
+                        <!-- Accomplishments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Group Streaks -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-fire text-orange-500 mr-2 streak-fire"></i>
+                        Group Streaks
+                    </h3>
+                    <div id="groupStreaks" class="space-y-3">
+                        <!-- Streaks will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Stats</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Today's Posts</span>
+                            <span id="todayPosts" class="font-semibold">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">This Week</span>
+                            <span id="weekPosts" class="font-semibold">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Active Members</span>
+                            <span id="activeMembers" class="font-semibold">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Accomplishment Modal -->
+    <div id="postAccomplishmentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Share Your Achievement</h3>
+                <button id="closePostModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="postAccomplishmentForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">What did you accomplish?</label>
+                    <input type="text" id="accomplishmentTitle" 
+                           placeholder="e.g., Finished PSET 3, Debugged authentication bug"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Description (optional)</label>
+                    <textarea id="accomplishmentDescription" 
+                              placeholder="Tell us more about your achievement..."
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" rows="3"></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Category</label>
+                    <select id="accomplishmentCategory" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="general">General Study</option>
+                        <option value="coding">Coding/Programming</option>
+                        <option value="study">Study Session</option>
+                        <option value="project">Project Work</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+                    <i class="fas fa-trophy mr-2"></i>Share Achievement
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Streaks Modal -->
+    <div id="streaksModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Group Streak Leaderboard</h3>
+                <button id="closeStreaksModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="streaksLeaderboard" class="space-y-3 max-h-96 overflow-y-auto">
+                <!-- Streaks will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get group ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupId = urlParams.get('id');
+        
+        // Check if user is logged in
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) {
+            window.location.href = '/';
+        }
+
+        // Update welcome message
+        document.getElementById('welcomeUser').textContent = `Welcome, ${user.username}!`;
+
+        // Load group details
+        async function loadGroupDetails() {
+            // Show loading state
+            document.getElementById('groupName').textContent = 'Loading...';
+            document.getElementById('groupDescription').textContent = 'Loading group details...';
+            document.getElementById('memberCount').textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(`/api/groups/${groupId}`);
+                if (response.ok) {
+                    const group = await response.json();
+                    document.getElementById('groupName').textContent = group.name;
+                    document.getElementById('groupDescription').textContent = group.description || 'No description';
+                    document.getElementById('memberCount').textContent = `${group.member_count || 0} members`;
+                } else {
+                    console.error('Failed to load group details');
+                    // Show error message
+                    document.getElementById('groupName').textContent = 'Group not found';
+                    document.getElementById('groupDescription').textContent = 'This group may not exist or you may not have access to it.';
+                    document.getElementById('memberCount').textContent = '0 members';
+                }
+            } catch (error) {
+                console.error('Error loading group details:', error);
+                document.getElementById('groupName').textContent = 'Error loading group';
+                document.getElementById('groupDescription').textContent = 'There was an error loading the group details.';
+                document.getElementById('memberCount').textContent = '0 members';
+            }
+        }
+
+        // Load accomplishments
+        async function loadAccomplishments() {
+            try {
+                const response = await fetch(`/api/groups/${groupId}/accomplishments`);
+                if (response.ok) {
+                    const accomplishments = await response.json();
+                    displayAccomplishments(accomplishments);
+                }
+            } catch (error) {
+                console.error('Error loading accomplishments:', error);
+            }
+        }
+
+        function displayAccomplishments(accomplishments) {
+            const container = document.getElementById('accomplishmentsFeed');
+            
+            if (accomplishments.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-trophy text-4xl mb-4"></i>
+                        <p>No accomplishments yet. Be the first to share!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = accomplishments.map(acc => `
+                <div class="accomplishment-card ${acc.category} bg-white border border-gray-200 rounded-lg p-4 card-hover">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-user text-green-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${acc.username}</h4>
+                                <p class="text-xs text-gray-500">${new Date(acc.created_at).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                            ${acc.category}
+                        </span>
+                    </div>
+                    <h5 class="font-medium text-gray-900 mb-2">${acc.title}</h5>
+                    ${acc.description ? `<p class="text-gray-600 text-sm">${acc.description}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Load group streaks
+        async function loadGroupStreaks() {
+            try {
+                const response = await fetch(`/api/groups/${groupId}/streaks`);
+                if (response.ok) {
+                    const streaks = await response.json();
+                    displayGroupStreaks(streaks);
+                }
+            } catch (error) {
+                console.error('Error loading streaks:', error);
+            }
+        }
+
+        function displayGroupStreaks(streaks) {
+            const container = document.getElementById('groupStreaks');
+            
+            if (streaks.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-sm">No streaks yet</p>';
+                return;
+            }
+
+            container.innerHTML = streaks.map((streak, index) => `
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <span class="text-sm font-medium text-gray-900 mr-2">${index + 1}.</span>
+                        <span class="text-sm text-gray-700">${streak.username}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-fire text-orange-500 mr-1"></i>
+                        <span class="text-sm font-semibold text-gray-900">${streak.current_streak}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Modal functionality
+        const postAccomplishmentBtn = document.getElementById('postAccomplishmentBtn');
+        const postAccomplishmentModal = document.getElementById('postAccomplishmentModal');
+        const closePostModal = document.getElementById('closePostModal');
+        const viewStreaksBtn = document.getElementById('viewStreaksBtn');
+        const streaksModal = document.getElementById('streaksModal');
+        const closeStreaksModal = document.getElementById('closeStreaksModal');
+
+        postAccomplishmentBtn.addEventListener('click', () => {
+            postAccomplishmentModal.classList.remove('hidden');
+            postAccomplishmentModal.classList.add('flex');
+        });
+
+        closePostModal.addEventListener('click', () => {
+            postAccomplishmentModal.classList.add('hidden');
+            postAccomplishmentModal.classList.remove('flex');
+        });
+
+        viewStreaksBtn.addEventListener('click', () => {
+            streaksModal.classList.remove('hidden');
+            streaksModal.classList.add('flex');
+            loadGroupStreaks();
+        });
+
+        closeStreaksModal.addEventListener('click', () => {
+            streaksModal.classList.add('hidden');
+            streaksModal.classList.remove('flex');
+        });
+
+        // Post accomplishment form
+        document.getElementById('postAccomplishmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                user_id: user.id,
+                group_id: parseInt(groupId),
+                title: document.getElementById('accomplishmentTitle').value,
+                description: document.getElementById('accomplishmentDescription').value,
+                category: document.getElementById('accomplishmentCategory').value
+            };
+
+            try {
+                const response = await fetch('/api/accomplishments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Achievement shared successfully! 🔥');
+                    postAccomplishmentModal.classList.add('hidden');
+                    postAccomplishmentModal.classList.remove('flex');
+                    loadAccomplishments(); // Reload accomplishments
+                    loadGroupStreaks(); // Reload streaks
+                } else {
+                    const error = await response.json();
+                    alert('Error sharing achievement: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error sharing achievement: ' + error.message);
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                localStorage.removeItem('user');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+
+        // Load data on page load
+        loadGroupDetails();
+        loadAccomplishments();
+        loadGroupStreaks();
+    </script>
+</body>
+</html>

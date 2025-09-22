@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schoova Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .streak-fire {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-white text-2xl font-bold">
+                            <i class="fas fa-graduation-cap mr-2"></i>Schoova
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/schedule" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-calendar-alt mr-1"></i>Schedule
+                    </a>
+                    <span id="welcomeUser" class="text-white">Welcome!</span>
+                    <button id="logoutBtn" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome back!</h2>
+            <p class="text-gray-600">Ready to build some productive habits today?</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <!-- Current Streak -->
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-fire text-orange-500 text-3xl streak-fire"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Current Streak</p>
+                        <p class="text-2xl font-bold text-gray-900" id="currentStreak">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Study Sessions Today -->
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-calendar-day text-blue-500 text-3xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Sessions Today</p>
+                        <p class="text-2xl font-bold text-gray-900" id="sessionsToday">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Sessions -->
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-chart-line text-green-500 text-3xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Sessions</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalSessions">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group Rank -->
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-trophy text-yellow-500 text-3xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Group Rank</p>
+                        <p class="text-2xl font-bold text-gray-900" id="groupRank">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Today's Schedule -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-calendar-day text-blue-600 mr-3"></i>
+                    Today's Schedule
+                </h3>
+                <div id="todaysSchedule" class="space-y-3">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-calendar-plus text-4xl mb-4"></i>
+                        <p>No sessions scheduled for today</p>
+                        <button id="addSessionBtn" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                            Add Study Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Study Groups -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-users text-green-600 mr-3"></i>
+                    Study Groups
+                </h3>
+                <div id="studyGroups" class="space-y-3">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-user-plus text-4xl mb-4"></i>
+                        <p>Join or create a study group</p>
+                        <div class="flex gap-2 justify-center mt-4">
+                            <button id="joinGroupBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                                Join Group
+                            </button>
+                            <button id="createGroupBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                Create Group
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-history text-purple-600 mr-3"></i>
+                Recent Activity
+            </h3>
+            <div id="recentActivity" class="space-y-3">
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-clock text-4xl mb-4"></i>
+                    <p>No recent activity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Session Modal -->
+    <div id="addSessionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Add Study Session</h3>
+                <button id="closeAddSessionModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="addSessionForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Subject</label>
+                    <input type="text" id="sessionSubject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Start Time</label>
+                    <input type="datetime-local" id="sessionStartTime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">End Time</label>
+                    <input type="datetime-local" id="sessionEndTime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                    Add Session
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Join Group Modal -->
+    <div id="joinGroupModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Join Study Group</h3>
+                <button id="closeJoinGroupModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="availableGroups" class="space-y-3 max-h-96 overflow-y-auto">
+                <!-- Groups will be loaded here -->
+            </div>
+            <div class="mt-6 text-center">
+                <button id="refreshGroupsBtn" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+                    Refresh Groups
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div id="createGroupModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Create Study Group</h3>
+                <button id="closeCreateGroupModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="createGroupForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Group Name</label>
+                    <input type="text" id="groupName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Description</label>
+                    <textarea id="groupDescription" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Subject Focus</label>
+                    <select id="groupSubject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="general">General Studies</option>
+                        <option value="math">Mathematics</option>
+                        <option value="science">Science</option>
+                        <option value="humanities">Humanities</option>
+                        <option value="engineering">Engineering</option>
+                        <option value="business">Business</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                    Create Group
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) {
+            window.location.href = '/';
+        }
+
+        // Update welcome message
+        document.getElementById('welcomeUser').textContent = `Welcome, ${user.username}!`;
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`/api/dashboard/${user.id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateDashboard(data);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function updateDashboard(data) {
+            // Update stats
+            document.getElementById('currentStreak').textContent = data.statistics?.current_streak || 0;
+            document.getElementById('totalSessions').textContent = data.statistics?.total_sessions || 0;
+            
+            // Update recent sessions
+            const recentSessions = data.recent_sessions || [];
+            const sessionsToday = recentSessions.filter(session => {
+                const sessionDate = new Date(session.created_at).toDateString();
+                const today = new Date().toDateString();
+                return sessionDate === today;
+            });
+            document.getElementById('sessionsToday').textContent = sessionsToday.length;
+
+            // Update today's schedule
+            updateTodaysSchedule(recentSessions);
+            
+            // Update study groups
+            updateStudyGroups(data.groups || []);
+        }
+
+        function updateStudyGroups(groups) {
+            const container = document.getElementById('studyGroups');
+            if (groups.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-user-plus text-4xl mb-4"></i>
+                        <p>Join or create a study group</p>
+                        <div class="flex gap-2 justify-center mt-4">
+                            <button id="joinGroupBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                                Join Group
+                            </button>
+                            <button id="createGroupBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                Create Group
+                            </button>
+                        </div>
+                    </div>
+                `;
+                // Re-attach event listeners
+                document.getElementById('joinGroupBtn').addEventListener('click', () => {
+                    joinGroupModal.classList.remove('hidden');
+                    joinGroupModal.classList.add('flex');
+                    loadAvailableGroups();
+                });
+                document.getElementById('createGroupBtn').addEventListener('click', () => {
+                    createGroupModal.classList.remove('hidden');
+                    createGroupModal.classList.add('flex');
+                });
+            } else {
+                container.innerHTML = groups.map(group => `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-gray-900">${group.name}</h4>
+                                <p class="text-sm text-gray-600 mt-1">${group.description || 'No description'}</p>
+                                <p class="text-xs text-gray-500 mt-2">Joined: ${new Date(group.joined_at).toLocaleDateString()}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                                    Member
+                                </span>
+                                <button onclick="viewGroupDetails(${group.id})" 
+                                        class="text-blue-600 hover:text-blue-800 text-sm">
+                                    View
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateTodaysSchedule(sessions) {
+            const container = document.getElementById('todaysSchedule');
+            const today = new Date().toDateString();
+            const todaysSessions = sessions.filter(session => {
+                const sessionDate = new Date(session.start_time).toDateString();
+                return sessionDate === today;
+            });
+
+            if (todaysSessions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-calendar-plus text-4xl mb-4"></i>
+                        <p>No sessions scheduled for today</p>
+                        <button id="addSessionBtn" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                            Add Study Session
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = todaysSessions.map(session => `
+                    <div class="flex items-center p-4 bg-blue-50 rounded-lg">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-4"></div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-900">${session.subject}</p>
+                            <p class="text-sm text-gray-600">
+                                ${new Date(session.start_time).toLocaleTimeString()} - 
+                                ${new Date(session.end_time).toLocaleTimeString()}
+                            </p>
+                        </div>
+                        <button class="text-green-600 hover:text-green-700" onclick="completeSession(${session.id})">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Modal functionality
+        const addSessionBtn = document.getElementById('addSessionBtn');
+        const addSessionModal = document.getElementById('addSessionModal');
+        const closeAddSessionModal = document.getElementById('closeAddSessionModal');
+
+        addSessionBtn.addEventListener('click', () => {
+            addSessionModal.classList.remove('hidden');
+            addSessionModal.classList.add('flex');
+        });
+
+        closeAddSessionModal.addEventListener('click', () => {
+            addSessionModal.classList.add('hidden');
+            addSessionModal.classList.remove('flex');
+        });
+
+        // Group modals
+        const joinGroupBtn = document.getElementById('joinGroupBtn');
+        const createGroupBtn = document.getElementById('createGroupBtn');
+        const joinGroupModal = document.getElementById('joinGroupModal');
+        const createGroupModal = document.getElementById('createGroupModal');
+        const closeJoinGroupModal = document.getElementById('closeJoinGroupModal');
+        const closeCreateGroupModal = document.getElementById('closeCreateGroupModal');
+
+        joinGroupBtn.addEventListener('click', () => {
+            joinGroupModal.classList.remove('hidden');
+            joinGroupModal.classList.add('flex');
+            loadAvailableGroups();
+        });
+
+        createGroupBtn.addEventListener('click', () => {
+            createGroupModal.classList.remove('hidden');
+            createGroupModal.classList.add('flex');
+        });
+
+        closeJoinGroupModal.addEventListener('click', () => {
+            joinGroupModal.classList.add('hidden');
+            joinGroupModal.classList.remove('flex');
+        });
+
+        closeCreateGroupModal.addEventListener('click', () => {
+            createGroupModal.classList.add('hidden');
+            createGroupModal.classList.remove('flex');
+        });
+
+        // Add session form
+        document.getElementById('addSessionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                user_id: user.id,
+                subject: document.getElementById('sessionSubject').value,
+                start_time: document.getElementById('sessionStartTime').value,
+                end_time: document.getElementById('sessionEndTime').value
+            };
+
+            try {
+                const response = await fetch('/api/study-sessions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Study session added successfully!');
+                    addSessionModal.classList.add('hidden');
+                    addSessionModal.classList.remove('flex');
+                    loadDashboardData(); // Reload dashboard
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error adding session: ' + error.message);
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                localStorage.removeItem('user');
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+
+        // Complete session function
+        async function completeSession(sessionId) {
+            try {
+                const response = await fetch(`/api/study-sessions/${sessionId}/complete`, {
+                    method: 'PUT'
+                });
+                if (response.ok) {
+                    alert('Session completed! Great job!');
+                    loadDashboardData(); // Reload dashboard
+                }
+            } catch (error) {
+                console.error('Error completing session:', error);
+            }
+        }
+
+        // Group management functions
+        async function loadAvailableGroups() {
+            try {
+                const response = await fetch('/api/groups');
+                if (response.ok) {
+                    const groups = await response.json();
+                    displayAvailableGroups(groups);
+                } else {
+                    document.getElementById('availableGroups').innerHTML = 
+                        '<div class="text-center text-gray-500 py-8">No groups available</div>';
+                }
+            } catch (error) {
+                console.error('Error loading groups:', error);
+                document.getElementById('availableGroups').innerHTML = 
+                    '<div class="text-center text-red-500 py-8">Error loading groups</div>';
+            }
+        }
+
+        function displayAvailableGroups(groups) {
+            const container = document.getElementById('availableGroups');
+            if (groups.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-8">No groups available</div>';
+                return;
+            }
+
+            container.innerHTML = groups.map(group => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-900">${group.name}</h4>
+                            <p class="text-sm text-gray-600 mt-1">${group.description || 'No description'}</p>
+                            <p class="text-xs text-gray-500 mt-2">Created by: ${group.created_by}</p>
+                        </div>
+                        <button onclick="joinGroup(${group.id})" 
+                                class="ml-4 bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                            Join
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function joinGroup(groupId) {
+            try {
+                const response = await fetch(`/api/groups/${groupId}/join`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+
+                if (response.ok) {
+                    alert('Successfully joined the group!');
+                    joinGroupModal.classList.add('hidden');
+                    joinGroupModal.classList.remove('flex');
+                    loadDashboardData(); // Reload dashboard to show updated groups
+                } else {
+                    const error = await response.json();
+                    alert('Error joining group: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error joining group: ' + error.message);
+            }
+        }
+
+        // Create group form
+        document.getElementById('createGroupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('groupName').value,
+                description: document.getElementById('groupDescription').value,
+                created_by: user.id,
+                subject: document.getElementById('groupSubject').value
+            };
+
+            try {
+                const response = await fetch('/api/groups', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const group = await response.json();
+                    alert(`Group "${group.name}" created successfully!`);
+                    createGroupModal.classList.add('hidden');
+                    createGroupModal.classList.remove('flex');
+                    loadDashboardData(); // Reload dashboard
+                } else {
+                    const error = await response.json();
+                    alert('Error creating group: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error creating group: ' + error.message);
+            }
+        });
+
+        // Refresh groups button
+        document.getElementById('refreshGroupsBtn').addEventListener('click', loadAvailableGroups);
+
+        // View group details function
+        function viewGroupDetails(groupId) {
+            window.location.href = `/group?id=${groupId}`;
+        }
+
+        // Load dashboard data on page load
+        loadDashboardData();
+    </script>
+</body>
+</html>
