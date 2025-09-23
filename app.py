@@ -166,6 +166,10 @@ def init_db():
 def index():
     return render_template('index.html')
 
+@app.route('/health')
+def health():
+    return jsonify({'status': 'healthy', 'message': 'Schoova app is running'})
+
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
@@ -839,6 +843,16 @@ def update_streak(user_id):
     else:
         return jsonify({'error': 'Failed to update streak'}), 500
 
-if __name__ == '__main__':
+# Initialize database when the module is imported
+try:
     init_db()
+    print("Database initialized successfully")
+except Exception as e:
+    print(f"Database initialization error: {e}")
+
+# For Vercel deployment
+if __name__ == '__main__':
     app.run(debug=True, port=5000)
+else:
+    # This is for Vercel
+    print("App loaded for Vercel deployment")
